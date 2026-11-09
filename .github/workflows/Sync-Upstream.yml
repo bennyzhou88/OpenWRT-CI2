@@ -1,0 +1,50 @@
+#CI项目：每天把上游 VIKINGYFY/OpenWRT-CI 合并到 main（私有工作流，上游没有此文件）
+name: Sync-Upstream
+
+on:
+  #每天北京时间 04:51，早于 Auto-Clean（05:21）和随后的 AX18 编译
+  schedule:
+    - cron: 51 20 * * *
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          #上游提交常会修改 .github/workflows，GITHUB_TOKEN 无权推送这类改动，需要带 workflow 权限的 SYNC_TOKEN
+          token: ${{secrets.SYNC_TOKEN || secrets.GITHUB_TOKEN}}
+
+      - name: Merge upstream
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/VIKINGYFY/OpenWRT-CI.git
+          git fetch upstream main
+
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "已经是上游最新，无需同步"
+            exit 0
+          fi
+
+          git merge upstream/main -X theirs --no-edit -m "同步上游 VIKINGYFY/OpenWRT-CI"
+          git push origin HEAD:main
+
+      - name: Disable upstream auto builds
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          #上游的 *-ALL 工作流会在 Auto-Clean 后自动编译全部平台，这里只保留 AX18
+          for FILE in .github/workflows/*.yml; do
+            NAME=$(basename "$FILE")
+            [[ "$NAME" == "AX18.yml" ]] && continue
+            if grep -q 'workflows: \["Auto-Clean"\]' "$FILE"; then
+              gh workflow disable "$NAME" -R "$GITHUB_REPOSITORY" && echo "已禁用 $NAME" || echo "$NAME 已是禁用状态"
+            fi
+          done

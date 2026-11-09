@@ -1,0 +1,5 @@
+#私有配置：Settings.sh 会把本文件追加到 .config 末尾，优先级高于 GENERAL.txt
+#上游没有这个文件，同步上游时不会冲突
+CONFIG_PACKAGE_luci-app-easytier=y
+CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-homeproxy=n

@@ -3,8 +3,31 @@
 CONFIG_PACKAGE_luci-app-easytier=y
 CONFIG_PACKAGE_luci-app-passwall=y
 CONFIG_PACKAGE_luci-app-homeproxy=n
-#passwall 不内置 Xray-core（体积大、升级频繁），刷机后自行上传到 /usr/bin/xray
+
+#passwall 精简：只保留 Xray 方案，且 Xray-core 不编译，刷机后自行上传到 /usr/bin/xray
 CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=n
 CONFIG_PACKAGE_xray-core=n
+#Sing-Box（Go，体积最大）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=n
+CONFIG_PACKAGE_sing-box=n
+#V2ray-Plugin（Go，SS 插件）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin=n
+CONFIG_PACKAGE_v2ray-plugin=n
+#Geoview（Go，DNS 分流用 geo 规则时才需要，没有时 passwall 自动改用文本规则列表）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Geoview=n
+CONFIG_PACKAGE_geoview=n
+#Shadowsocks-Rust 客户端（Xray 自身已支持 SS 协议）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Shadowsocks_Rust_Client=n
+CONFIG_PACKAGE_shadowsocks-rust-sslocal=n
+#ShadowsocksR-Libev 客户端（只用 Xray 时不需要）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_ShadowsocksR_Libev_Client=n
+CONFIG_PACKAGE_shadowsocksr-libev-ssr-local=n
+CONFIG_PACKAGE_shadowsocksr-libev-ssr-redir=n
+#Simple-Obfs（SS 插件）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Simple_Obfs=n
+CONFIG_PACKAGE_simple-obfs-client=n
+#Haproxy（只在多节点负载均衡时使用）
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Haproxy=n
+CONFIG_PACKAGE_haproxy=n
 #保留 unzip，方便在 passwall 的“组件更新”页面直接在线下载 Xray
 CONFIG_PACKAGE_unzip=y

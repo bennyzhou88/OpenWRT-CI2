@@ -2,7 +2,7 @@
 name: Sync-Upstream
 
 on:
-  #每天北京时间 04:51，早于 Auto-Clean（05:21）和随后的 AX18 编译
+  #每天北京时间 04:51，早于 Auto-Clean（05:21）和随后的 MY-ALL 编译
   schedule:
     - cron: 51 20 * * *
   workflow_dispatch:
@@ -40,10 +40,10 @@ jobs:
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
-          #上游的 *-ALL 工作流会在 Auto-Clean 后自动编译全部平台，这里只保留 AX18
+          #上游的 *-ALL 工作流会在 Auto-Clean 后自动编译全部平台，这里只保留自己的 MY-ALL
           for FILE in .github/workflows/*.yml; do
             NAME=$(basename "$FILE")
-            [[ "$NAME" == "AX18.yml" ]] && continue
+            [[ "$NAME" == "MY-ALL.yml" ]] && continue
             if grep -q 'workflows: \["Auto-Clean"\]' "$FILE"; then
               gh workflow disable "$NAME" -R "$GITHUB_REPOSITORY" && echo "已禁用 $NAME" || echo "$NAME 已是禁用状态"
             fi

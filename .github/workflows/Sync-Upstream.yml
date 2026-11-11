@@ -1,10 +1,9 @@
-#CI项目：每天把上游 VIKINGYFY/OpenWRT-CI 合并到 main（私有工作流，上游没有此文件）
+#CI项目：把上游 VIKINGYFY/OpenWRT-CI 合并到 main（私有工作流，上游没有此文件）
+#只能手动运行：fork 仓库里有定时任务会被 GitHub 整体禁用
 name: Sync-Upstream
 
 on:
-  #每天北京时间 04:51，早于 Auto-Clean（05:21）和随后的 MY-ALL 编译
-  schedule:
-    - cron: 51 20 * * *
+  #手动同步
   workflow_dispatch:
 
 permissions: write-all
@@ -34,17 +33,11 @@ jobs:
           fi
 
           git merge upstream/main -X theirs --no-edit -m "同步上游 VIKINGYFY/OpenWRT-CI"
-          git push origin HEAD:main
 
-      - name: Disable upstream auto builds
-        env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: |
-          #上游的 *-ALL 工作流会在 Auto-Clean 后自动编译全部平台，这里只保留自己的 MY-ALL
-          for FILE in .github/workflows/*.yml; do
-            NAME=$(basename "$FILE")
-            [[ "$NAME" == "MY-ALL.yml" ]] && continue
-            if grep -q 'workflows: \["Auto-Clean"\]' "$FILE"; then
-              gh workflow disable "$NAME" -R "$GITHUB_REPOSITORY" && echo "已禁用 $NAME" || echo "$NAME 已是禁用状态"
-            fi
-          done
+          #上游的工作流带有定时任务和“清理后自动编译”，合并后再去掉，只保留手动触发
+          python3 -I .github/scripts/strip-auto-triggers.py
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -am "去掉上游带来的自动触发，只保留手动触发"
+          fi
+
+          git push origin HEAD:main

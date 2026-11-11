@@ -1,5 +1,6 @@
 #CI项目：只编译自己的设备（私有工作流，上游没有此文件）
-#IPQ60XX：cmiot_ax18、qihoo_360v6、zn_m2；IPQ807X：redmi_ax6
+#IPQ60XX：cmiot_ax18、qihoo_360v6、zn_m2
+#IPQ807X：redmi_ax6（OpenWrt 扩容布局）、redmi_ax6-stock（原厂布局）
 name: MY-ALL
 
 #CI计划
@@ -7,6 +8,15 @@ on:
   #手动编译
   workflow_dispatch:
     inputs:
+      TARGET:
+        description: '只编译哪个平台，默认全部。'
+        default: 'ALL'
+        required: false
+        type: choice
+        options:
+          - ALL
+          - IPQ60XX-MY-WIFI-YES
+          - IPQ807X-MY-WIFI-YES
       PACKAGE:
         description: '手动调整插件包，多个请用\n符号隔开。'
         required: false
@@ -27,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        CONFIG: [IPQ60XX-MY-WIFI-YES, IPQ807X-MY-WIFI-YES]
+        CONFIG: ${{fromJSON(inputs.TARGET == 'IPQ60XX-MY-WIFI-YES' && '["IPQ60XX-MY-WIFI-YES"]' || inputs.TARGET == 'IPQ807X-MY-WIFI-YES' && '["IPQ807X-MY-WIFI-YES"]' || '["IPQ60XX-MY-WIFI-YES","IPQ807X-MY-WIFI-YES"]')}}
     #调用上游公用编译核心WRT-CORE.yml
     uses: ./.github/workflows/WRT-CORE.yml
     with:

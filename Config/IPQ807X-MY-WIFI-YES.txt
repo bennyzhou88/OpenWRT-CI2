@@ -2,4 +2,7 @@
 CONFIG_TARGET_qualcommax=y
 CONFIG_TARGET_qualcommax_ipq807x=y
 #设备列表
+#redmi_ax6：OpenWrt 扩容布局（内核在 ubi_kernel 分区，根文件系统在 rootfs 分区）
 CONFIG_TARGET_DEVICE_qualcommax_ipq807x_DEVICE_redmi_ax6=y
+#redmi_ax6-stock：原厂布局（rootfs / rootfs_1 双系统分区）
+CONFIG_TARGET_DEVICE_qualcommax_ipq807x_DEVICE_redmi_ax6-stock=y
